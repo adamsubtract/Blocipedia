@@ -1,17 +1,17 @@
 {
   "name": "Blocipedia",
   "version": "1.0.0",
-  "description": "A wiki clone made with Node.js",
+  "description": "A wiki for sharing information",
   "main": "src/server.js",
   "scripts": {
-    "test": "export NODE ENV=test && jasmine",
+    "test": "export NODE_ENV=test && jasmine",
     "start": "node src/server.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/adamsubtract/Blocipedia.git"
   },
-  "author": "",
+  "author": "Forrest Longanecker",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/adamsubtract/blocipedia/issues"
@@ -20,10 +20,10 @@
   "devDependencies": {
     "faker": "^4.1.0",
     "jasmine": "^3.4.0",
-    "morgan": "^1.9.1",
     "request": "^2.88.0"
   },
   "dependencies": {
+    "@sendgrid/mail": "^6.3.1",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.18.3",
     "dotenv": "^7.0.0",
@@ -32,6 +32,7 @@
     "express-flash": "0.0.2",
     "express-session": "^1.16.1",
     "express-validator": "^5.3.1",
+    "morgan": "^1.9.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "pg": "^7.9.0",
