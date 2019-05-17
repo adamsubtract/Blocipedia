@@ -7,16 +7,21 @@
   <body>
     <% include ./partials/navbar.ejs %>
 
-    <main>
+    <main class="main-container">
       <% include ./partials/messages.ejs %>
 
-      <header>
+      <header class="header-container">
         <h1>~*Sendipedia*~</h1>
         <p>The place to document mountains and rocks, anything climbing.</p>
-        <a href="/users/signup">Sign up</a>
+        <% if(currentUser) { %>   
+          <a href="/users/signout">Sign out</a>
+        <% } else { %>
+          <a href="/users/signup">Sign up</a>
+          <a href="/users/signin">Sign in</a>
+        <% } %>
       </header>
 
-      <section>
+      <section class="index-info-container">
         <section>
           <h4>Crags</h4>
           <p>
