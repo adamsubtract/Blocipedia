@@ -87,6 +87,89 @@ describe('routes : users', () => {
     });
   });
 
+  describe('standard user actions', () => {
+
+    beforeEach((done) => {
+      this.activeUser;
+
+      User.create({
+        name: 'Rocky Limber',
+        email: 'rocky@climb.com',
+        password: '123456',
+        role: 'standard'
+      })
+      .then((user) => {
+        this.activeUser = user;
+
+        request.get({
+          url: 'http://localhost:3000/auth/fake',
+          form: {
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            userId: user.id
+          }
+        }, 
+          (err, res, body) => {
+            done();
+          }
+        );
+      });
+    });
+    
+
+    describe('GET /users/upgrade', () => {
+      it('should render a view with an upgrade form', (done) => {
+        request.get(`${base}upgrade`, (err, res, body) => {
+          expect(res.statusCode).toBe(200);
+          expect(err).toBeNull();
+          expect(body).toContain('Upgrade to a Premium account')
+          expect(body).toContain('Downgrade your account to Standard')
+          done();
+        });
+      });
+    });
+
+    describe('POST /users/promote', () => {
+      it('should promote the user to premium and redirect to homepage', (done) => {
+        request.post(`${base}promote`, (err, res, body) => {
+          User.findByPk(this.activeUser.id)
+          .then((user) => {
+            expect(err).toBeNull();
+            expect(user.name).toBe('Rocky Limber');
+            expect(user.role).toBe('premium');
+            done();
+          })
+          .catch((err) => {
+            console.log(err);
+            done();
+          });
+        });
+      });
+    });
+
+    describe('POST /users/demote', () => {
+      it('should promote the user to premium and redirect to homepage', (done) => {
+        request.post(`${base}demote`, (err, res, body) => {
+          User.findByPk(this.activeUser.id)
+          .then((user) => {
+            expect(err).toBeNull();
+            expect(user.name).toBe('Rocky Limber');
+            expect(user.role).toBe('standard');
+            done();
+          })
+          .catch((err) => {
+            console.log(err);
+            done();
+          });
+        });
+      });
+    });
+
+    // END OF STANDARD SUITE
+  })
+
+
 
   // end of test suite
 });

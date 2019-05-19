@@ -18,4 +18,28 @@ module.exports = {
       callback(err);
     })
   },
+  promoteUser(req, callback){
+    return User.update(
+      {role: 'premium'},
+      {where: {id: req.user.id}}
+    )
+    .then((updatedRows) => {
+      callback(null, updatedRows);
+    })
+    .catch((err) => {
+      callback(err);
+    })
+  },
+  demoteUser(req, callback){
+    return User.update(
+      {role: 'standard'},
+      {where: {id: req.user.id}}
+    )
+    .then((updatedRows) => {
+      callback(null, updatedRows);
+    })
+    .catch((err) => {
+      callback(err);
+    })
+  },
 };

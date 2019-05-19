@@ -21,6 +21,7 @@ module.exports = {
         passport.authenticate("local")(req, res, () => {
           req.flash("notice", "You've successfully signed in!");
           res.redirect("/");
+          // sendgrid confirmation email
           emails.newUserEmail(newUser);
         });
       }
@@ -44,5 +45,40 @@ module.exports = {
     req.logout();
     req.flash('notice', "You've successfully signed out!");
     res.redirect('/');
+  },
+  upgradeForm(req, res, next){
+    res.render('users/upgrade');
+  },
+  promoteUser(req, res, next){
+    if(req.user.role === 'standard'){
+      userQueries.promoteUser(req, (err, user) => {
+        if(err){
+          req.flash('error', err);
+          res.redirect('users/upgrade');
+        } else {
+          req.flash('notice', "You've successfully upgraded your account to premium!");
+          res.redirect('/');
+        }
+      });
+    } else {
+      req.flash('notice', 'You are not a standard memeber so cannot be upgraded to premium');
+      res.redirect('/');
+    }
+  },
+  demoteUser(req, res, next){
+    if(req.user.role === 'premium'){
+      userQueries.demoteUser(req, (err, user) => {
+        if(err){
+          req.flash('error', err);
+          res.redirect('users/upgrade');
+        } else {
+          req.flash('notice', "You've successfully downgraded your account to standard");
+          res.redirect('/');
+        }
+      });
+    } else {
+      req.flash('notice', 'You are not a premium memeber so cannot be downgraded to standard');
+      res.redirect('/');
+    }
   },
 };
