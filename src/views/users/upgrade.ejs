@@ -11,27 +11,42 @@
 
       <% include ../static/partials/messages.ejs %>
 
-      <h1>Upgrade to a Premium account</h1>
+      <% if(currentUser.role == 'standard'){ %>
+        <h1>Upgrade to a Premium account</h1>
+        <h2>Start creating your own private wikis</h2>
+  
+        <h1><%= currentUser.name %></h1>
 
-      <form action="/users/promote" method="post">
+        <form action="/users/<%= currentUser.id %>/charge" method="post" id="payment-form">
+          <script src="https://checkout.stripe.com/checkout.js" class="stripe-button" 
+              data-key="pk_test_qmmuxmoMEcZIQUUzZTiRIi4J00cpE5u86x"
+              data-amount="1500" 
+              data-name="Demo Site" 
+              data-description="Premium membership upgrade" 
+              data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+              data-locale="auto">
+          </script>
+        </form>
+      <% } else if(currentUser.role == 'premium'){ %>
+        <h1>Downgrade your account to Standard</h1>
+        <h2>WARNING: all private wikis will become public if you demote your account!</h2>
+  
+        <form action="/users/demote" method="post">
+  
+          <div>
+            <label for="standard">Are you sure you want to downgrade?</label>
+            <button type="submit">Downgrade account</button>
+          </div>
+  
+        </form>
+      <% } else if(currentUser.role == 'admin'){ %>
+        <h1>Edit User account features</h1>
+        <!-- admin logic here -->
+      <% } else { %>
+        <p> Oops, something went wrong. Are you signed in?</p>
+      <% } %>
 
-        <div>
-          <label for="premium">Premium</label>
-          <button type="submit">Upgrade account</button>
-        </div>
 
-      </form>
-
-      <h2>Downgrade your account to Standard</h2>
-
-      <form action="/users/demote" method="post">
-
-        <div>
-          <label for="standard">Standard</label>
-          <button type="submit">Downgrade account</button>
-        </div>
-
-      </form>
     </main>
   </body>
 </html>

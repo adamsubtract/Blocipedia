@@ -15,6 +15,7 @@
         <p>The place to document mountains and rocks, anything climbing.</p>
         <div class="sign-in-out-container">
           <% if(currentUser) { %>   
+            <a href="/users/<%= currentUser.id %>">Account</a>
             <a href="/users/signout">Sign out</a>
           <% } else { %>
             <a href="/users/signup">Sign up</a>
