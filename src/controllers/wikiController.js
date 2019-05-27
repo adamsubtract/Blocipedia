@@ -4,13 +4,23 @@ const markdown = require("markdown").markdown;
 
 module.exports = {
   index(req, res, next){
-    wikiQueries.getAllPublicWikis((err, wikis) => {
-      if(err){
-        res.redirect(500, 'static/index');
-      } else {
-        res.render('wikis/index', {wikis});
-      }
-    })
+    if(req.user){
+      wikiQueries.getAllWikis(req, (err, result) => {
+        if(err){
+          res.redirect(500, 'static/index');
+        } else {
+          res.render('wikis/index', {result});
+        }
+      })
+    } else {
+      wikiQueries.getAllPublicWikis(req, (err, result) => {
+        if(err){
+          res.redirect(500, 'static/index');
+        } else {
+          res.render('wikis/index', {result});
+        }
+      })
+    }
   },
   new(req, res, next){
     const authorized = new Authorizer(req.user).new();
@@ -68,11 +78,18 @@ module.exports = {
     }
   },
   show(req, res, next){
-    wikiQueries.getWiki(req.params.id, (err, wiki) => {
-      if(err || wiki == null){
-        res.redirect(404, '/');
+    wikiQueries.getWiki(req, (err, result) => {
+      if(err || result.wiki == undefined){
+        res.redirect(404, '/wikis');
       } else {
-        res.render('wikis/show', {wiki});
+        const authorized = new Authorizer(req.user, result.wiki).show();
+        
+        if(authorized || !result.wiki.private){
+          res.render('wikis/show', {result});
+        } else {
+          req.flash('notice', 'You are not authorized to do that');
+          res.redirect('/wikis')
+        }
       }
     });
   },
@@ -85,15 +102,15 @@ module.exports = {
       }
     });
   },
-  edit(req, res, next){
-    wikiQueries.getWiki(req.params.id, (err, wiki) => {
-      if(err || wiki == null){
-        res.redirect(404, `/`);
+  edit(req, res, next){ 
+    wikiQueries.getWiki(req, (err, result) => {
+      if(err || result.wiki == undefined){
+        res.redirect(404, `/wikis/${req.params.id}`);
       } else {
-        const authorized = new Authorizer(req.user, wiki).edit();
+        const authorized = new Authorizer(req.user, result.wiki).edit();
 
-        if(authorized){
-            res.render('wikis/edit', {wiki});
+        if(authorized || (!result.wiki.private && req.user)){
+            res.render('wikis/edit', {result});
         } else {
           req.flash('notice', 'You are not authorized to do that.');
           res.redirect(`/wikis/${req.params.id}`);

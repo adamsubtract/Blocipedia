@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'userId',
       onDelete: 'CASCADE'
     });
+    Wiki.hasMany(models.Collaborator, {
+      foreignKey: 'wikiId',
+      as: 'collaborators'
+    });
   };
   Wiki.addScope("allOwnedPrivate", (userId) => {
     return {
@@ -30,5 +34,14 @@ module.exports = (sequelize, DataTypes) => {
       order: [["createdAt", "DESC"]]
     }
   });
+
+  Wiki.prototype.getCollaboratorFor = function(userId){
+    return this.collaborators.find((collaborator) => { return collaborator.userId == userId})
+  };
+
+  Wiki.prototype.isOwner = function(userId){
+    return this.userId == userId
+  };
+
   return Wiki;
 };

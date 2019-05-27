@@ -1,32 +1,66 @@
 const Wiki = require('./models').Wiki;
+const Collaborator = require('./models').Collaborator;
 const Authorizer = require('../policies/wiki');
 const markdown = require('markdown').markdown;
 
 module.exports = {
-  getAllWikis(callback){
-    return Wiki.findAll()
-    .then((wikis) => {
-      callback(null, wikis);
-    })
-    .catch((err) => {
-      callback(err);
-    })
+  getAllWikis(req, callback){
+    let result = {};
+    Wiki.findAll({where: {private: false}})
+    .then((publicWikis) => {
+      result["publicWikis"] = publicWikis;
+      
+      Wiki.scope({method: ["allOwnedPrivate", req.user.id]}).findAll()
+      .then((ownedPrivateWikis) => {
+        result["privateWikis"] = ownedPrivateWikis;
+        
+        Collaborator.scope({method: ['allCollabWikis', req.user.id]}).findAll()
+        .then((collaborativeWikis) => {
+          result["collabWikis"] = collaborativeWikis;
+          // can insert more associations here
+          callback(null, result);
+        })
+        .catch((err) => {
+          callback(err);
+        });
+      });
+    });
   },
-  getAllPublicWikis(callback){
+  getAllPublicWikis(req, callback){
+    let result = {};
     return Wiki.findAll({where: {private: false}})
-    .then((wikis) => {
-      callback(null, wikis);
+    .then((publicWikis) => {
+      result["publicWikis"] = publicWikis
+      callback(null, result);
     })
     .catch((err) => {
       callback(err);
     })
   },
-  getWiki(id, callback){
-    return Wiki.findByPk(id)
+  getWiki(req, callback){
+    let result = {};
+    Wiki.findByPk(req.params.id, {
+      include: [
+        {model: Collaborator, as: 'collaborators'}
+      ]}
+    )
     .then((wiki) => {
-      callback(null, wiki);
-    })
-    .catch((err) => {
+    if(!wiki){
+      callback(404);
+    } else {
+      result["wiki"] = wiki;
+      
+      Collaborator.scope({method: ['allCollabUsers', (wiki.id)]}).findAll()
+      .then((collaboratorUsers) => {
+        result["collabUsers"] = collaboratorUsers;
+        callback(null, result);
+      })
+      .catch((err) => {
+        callback(err);
+      });
+    }
+  })
+  .catch((err) => {
       callback(err);
     })
   },
@@ -64,7 +98,11 @@ module.exports = {
     });
   },
   updateWiki(req, updatedWiki, callback){
-    return Wiki.findByPk(req.params.id)
+    return Wiki.findByPk(req.params.id, {
+      include: [
+        {model: Collaborator, as: 'collaborators'}
+      ]
+    })
     .then((wiki) => {
       if(!wiki){
         return callback('Wiki not found');

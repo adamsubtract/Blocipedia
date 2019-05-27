@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include ../static/partials/head.ejs %>
+  </head>
+
+  <body>
+    <% include ../static/partials/navbar.ejs %>
+    <% include ../static/partials/userCard.ejs %>
+
+    <main class="main-container">
+      <% include ../static/partials/messages.ejs %>
+
+      <a href="/users/<%= result.user.id %>/upgrade">Edit account</a>
+
+      <% if(result.privateWikis.length != 0){ %>
+        <div>
+          <h2>Your private wikis:</h2>
+          <a href="/collaborators/edit">Edit collaborators</a>
+          <% result.privateWikis.forEach((privateWiki) => { %>
+            <li>
+              <a href="/wikis/<%= privateWiki.id%>"><%= privateWiki.title %></a>
+            </li>
+          <% }) %>
+        </div>
+      <% } %>
+        
+      <% if(result.collabWikis.length != 0){ %>
+        <div>
+          <h2>Your collaborative wikis:</h2>
+          <% result.collabWikis.forEach((collabWiki) => { %>
+            <li>
+              <a href="/wikis/<%= collabWiki.wikiId%>"><%= collabWiki.title %></a>
+            </li>
+          <% }) %>
+        </div>
+      <% } %>
+    </main>
+  </body>
+</html>
